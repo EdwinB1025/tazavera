@@ -51,8 +51,9 @@ Everything runs in the **Ubuntu terminal**, inside the WSL file system (not unde
 ```bash
 git clone https://github.com/EdwinB1025/tazavera.git ~/tazavera
 cd ~/tazavera
-chmod +x install.sh
 ```
+
+`install.sh` is already executable in the repository: no `chmod` needed (a local `chmod` would block later `git pull`s).
 
 ### 2. Run the installation
 
