@@ -110,9 +110,10 @@ docker compose build front
 docker compose up -d front ngrok
 
 # Check (B5): the front answers on /es within about a minute
+# 127.0.0.1, not localhost: in the image localhost resolves to IPv6 (::1) and Next.js listens on IPv4 only
 front_ok=0
 for _ in $(seq 1 30); do
-  if docker compose exec -T front wget -q -O /dev/null http://localhost:3000/es; then front_ok=1; break; fi
+  if docker compose exec -T front wget -q -O /dev/null http://127.0.0.1:3000/es 2>/dev/null; then front_ok=1; break; fi
   sleep 2
 done
 if [ "$front_ok" != 1 ]; then
