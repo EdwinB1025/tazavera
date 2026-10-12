@@ -38,7 +38,7 @@ The API and the database have no public address: everything the browser needs fr
 - 🐙 The repositories `EdwinB1025/tazzavera-api` (branch `deploy`) and `EdwinB1025/tazavera-front` (branch `develop`) **public**, with what you want to deploy pushed to those branches.
 
 **Have at hand** for the first run (the script asks for them)
-- 🌐 The ngrok domain, with `https://` (e.g. `https://xxxx.ngrok-free.dev`).
+- 🌐 The ngrok domain, **with `https://` at the start** and no slash at the end (e.g. `https://xxxx.ngrok-free.dev`); without `https://` the script asks again.
 - 🔑 The ngrok authtoken.
 - 🗄️ Two database passwords (app user and root): at least 12 characters, letters, digits and `. _ -` only.
 
@@ -80,6 +80,46 @@ cd ~/tazavera
 
 The same script updates: it downloads the new commits, rebuilds only what changed, applies the new migrations and restarts what is needed. The database, the API key and the Passport keys are kept.
 
+## 🚦 Servers: state, stop and start
+
+Run the commands from `~/tazavera`, in the Ubuntu terminal.
+
+### Are they running?
+
+```bash
+docker compose ps
+```
+
+Each service shows its state: `running` = on (`healthy` for the database = ready); `exited` or no line = off. Two other ways to tell:
+
+- 🌍 The public address loads in the browser: everything is up.
+- 🐳 Docker Desktop → *Containers*: a green dot per running service.
+
+### Stop
+
+| Command | What it does | Data |
+|---|---|---|
+| `docker compose stop` | Stops every service; the containers stay | Kept |
+| `docker compose stop ngrok` | Stops only the public address; the site keeps running locally | Kept |
+| `docker compose down` | Stops and removes the containers | Kept (database and keys are in volumes) |
+| `docker compose down -v` | ⚠️ Stops, removes and **deletes the database and the Passport keys** | Lost |
+
+For everyday use, `docker compose stop` is enough.
+
+### Start
+
+| After | Command |
+|---|---|
+| `docker compose stop` | `docker compose start` |
+| `docker compose stop ngrok` | `docker compose start ngrok` |
+| `docker compose down` | `./install.sh` (recreates everything; safe to run again) |
+
+### After a reboot
+
+Every service has `restart: unless-stopped`: when Docker Desktop starts, the services start again by themselves, the public address included, unless you had stopped them. To have this happen when you turn the laptop on, enable *Start Docker Desktop when you sign in* in Docker Desktop's general settings.
+
+The site is offline while the laptop is off or asleep, or Docker Desktop is closed.
+
 ## ⚙️ What `install.sh` does
 
 1. ✅ Checks that git and Docker are available.
@@ -105,6 +145,7 @@ Run them from `~/tazavera`.
 |---|---|
 | `./install.sh` | Installs or updates everything |
 | `docker compose ps` | State of every service |
+| `docker compose stop` / `docker compose start` | Stops / starts every service (see *Servers*) |
 | `docker compose logs -f api` | Follows a service's log (`api`, `front`, `db`, `ngrok`, `scheduler`) |
 | `docker compose exec api bash` | Opens a shell inside a container |
 | `docker compose down` | Stops and removes the containers; **the data is kept** |
