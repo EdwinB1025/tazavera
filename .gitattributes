@@ -1,0 +1,2 @@
+# Linux line endings everywhere: bash and the settings files break with Windows ones
+* text=auto eol=lf

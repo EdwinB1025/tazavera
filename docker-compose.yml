@@ -1,0 +1,104 @@
+name: tazavera
+
+services:
+  db:
+    # Pin the exact tag from Docker Hub
+    image: mysql:8
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: tazavera_api
+      MYSQL_USER: tazavera
+      # Both from .env (asked by install.sh on the first run)
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 10
+    networks: [tazavera]
+
+  api:
+    build:
+      context: ./tazavera-api
+      dockerfile: deploy/Dockerfile
+    image: tazavera-api
+    restart: unless-stopped
+    env_file: ./.env.prod
+    environment:
+      # From .env, the same password as the db service
+      DB_PASSWORD: ${DB_PASSWORD}
+    configs:
+      - source: apache_prefork
+        target: /etc/apache2/conf-enabled/zz-mpm-prefork.conf
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - api_storage:/var/www/html/storage
+    # No ports: only the front reaches it
+    networks: [tazavera]
+
+  scheduler:
+    # Same image as api, another command
+    image: tazavera-api
+    command: php artisan schedule:work
+    restart: unless-stopped
+    env_file: ./.env.prod
+    environment:
+      # From .env, the same password as the db service
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [tazavera]
+
+  front:
+    build:
+      context: ./tazavera-front
+      args:
+        NEXT_PUBLIC_APP_URL: ${PUBLIC_ORIGIN}
+        NEXT_PUBLIC_API_URL: ${PUBLIC_ORIGIN}/api
+        # Passed by install.sh
+        NEXT_PUBLIC_OAUTH_CLIENT_ID: ${FRONT_CLIENT_ID:-}
+    image: tazavera-front
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:80
+    depends_on:
+      - api
+    # Local checks only; the tunnel uses front:3000 inside the network
+    ports:
+      - "3000:3000"
+    networks: [tazavera]
+
+  ngrok:
+    # Pin the exact tag from Docker Hub
+    image: ngrok/ngrok
+    restart: unless-stopped
+    command: http front:3000 --url=${PUBLIC_ORIGIN}
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    depends_on:
+      - front
+    networks: [tazavera]
+
+networks:
+  tazavera:
+    ipam:
+      config:
+        # Fixed, so TRUSTED_PROXIES in .env.prod can name it
+        - subnet: 172.30.0.0/24
+
+volumes:
+  db_data:
+  api_storage:
+
+# D9: at most 70 Apache processes at once
+configs:
+  apache_prefork:
+    content: |
+      <IfModule mpm_prefork_module>
+          MaxRequestWorkers 70
+      </IfModule>
