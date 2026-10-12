@@ -6,8 +6,8 @@ set -euo pipefail
 
 API_REPO=https://github.com/EdwinB1025/tazzavera-api.git
 FRONT_REPO=https://github.com/EdwinB1025/tazavera-front.git
-API_BRANCH=PROD
-FRONT_BRANCH=master
+API_BRANCH=deploy
+FRONT_BRANCH=develop
 ENV_PROD=.env.prod
 
 cd "$(dirname "$0")"

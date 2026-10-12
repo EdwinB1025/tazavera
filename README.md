@@ -35,7 +35,7 @@ The API and the database have no public address: everything the browser needs fr
 
 **The accounts**
 - 🌐 An **ngrok account**: its domain (dashboard → *Domains*; on the free plan, one fixed domain with a random name) and its authtoken (*Getting Started → Your Authtoken*). Nothing to install: ngrok runs as a container.
-- 🐙 The repositories `EdwinB1025/tazzavera-api` (branch `PROD`) and `EdwinB1025/tazavera-front` (branch `master`) **public**, with what you want to deploy pushed to those branches.
+- 🐙 The repositories `EdwinB1025/tazzavera-api` (branch `deploy`) and `EdwinB1025/tazavera-front` (branch `develop`) **public**, with what you want to deploy pushed to those branches.
 
 **Have at hand** for the first run (the script asks for them)
 - 🌐 The ngrok domain, with `https://` (e.g. `https://xxxx.ngrok-free.dev`).
@@ -71,7 +71,7 @@ Then it downloads and builds everything: the first run takes several minutes. It
 
 ## 🔄 Updating
 
-After pushing to `PROD` (API) or `master` (front):
+After pushing to `deploy` (API) or `develop` (front):
 
 ```bash
 cd ~/tazavera
