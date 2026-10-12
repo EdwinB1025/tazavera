@@ -13,7 +13,9 @@ ENV_PROD=.env.prod
 cd "$(dirname "$0")"
 
 fail() { echo "install.sh: $*" >&2; exit 1; }
-artisan() { docker compose exec -T api php artisan --no-ansi "$@"; }
+# Artisan runs as www-data, Apache's user, so every file it creates (Passport keys, caches) stays readable by Apache.
+# HOME=/tmp: www-data's home is not writable and tinker writes its settings there.
+artisan() { docker compose exec -T -u www-data -e HOME=/tmp api php artisan --no-ansi "$@"; }
 
 # Asks until the answer matches the pattern; secret answers are not shown
 ask() {
@@ -84,6 +86,8 @@ fi
 
 # 6. Database, API and scheduler
 docker compose up -d --wait db api scheduler
+# Files left by root in earlier installs (Passport keys, caches) go back to www-data; safe to repeat
+docker compose exec -T api chown -R www-data:www-data storage bootstrap/cache
 artisan config:clear
 
 # 7. Migrations, every run

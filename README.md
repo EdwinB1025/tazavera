@@ -12,7 +12,7 @@ Deployment repository for **Tazavera**, the specialty coffee verification platfo
 | Service | What it is | Reachable from |
 |---|---|---|
 | 🌐 **ngrok** | The single public door and the `https` | The internet, on the fixed public address |
-| 🖥️ **front** | Next.js: the pages, and it forwards the API calls | ngrok (inside the network); `localhost:3000` for local checks |
+| 🖥️ **front** | Next.js: the pages, and it forwards the API calls | Only ngrok, inside the network (no port on the machine) |
 | 🐘 **api** | Laravel on Apache (`php:8.5-apache`) | Only the front |
 | ⏱️ **scheduler** | Same image as the API, runs the scheduled tasks | — |
 | 🗄️ **db** | MySQL 8 | Only the API and the scheduler |
@@ -21,7 +21,7 @@ Deployment repository for **Tazavera**, the specialty coffee verification platfo
 browser ──https──▶ ngrok ──▶ front :3000 ──http──▶ api :80 ──▶ db :3306
 ```
 
-The API and the database have no public address: everything the browser needs from the API goes through the front.
+No service publishes a port on the machine: the only way in is the public address. The API and the database have no public address: everything the browser needs from the API goes through the front. A local `npm run dev` on port 3000 does not collide with the deploy.
 
 ## ✅ Requirements
 
@@ -30,7 +30,6 @@ The API and the database have no public address: everything the browser needs fr
 - 🐳 **Docker Desktop** installed and **open**, with *Settings → Resources → WSL integration → Ubuntu* turned on. In the Ubuntu terminal, `docker compose version` must answer.
 - 🔧 **git** in Ubuntu (`sudo apt install git` if missing).
 - 💾 About **7.5 GiB of memory** for Docker (`docker info`). With less, lower `MaxRequestWorkers` in `docker-compose.yml` (see Notes).
-- 🔌 **Port 3000 free** on the machine.
 - 📶 **Internet access**: the builds download from GitHub, Docker Hub, npm and Packagist.
 
 **The accounts**
@@ -101,7 +100,7 @@ Each service shows its state: `running` = on (`healthy` for the database = ready
 | Command | What it does | Data |
 |---|---|---|
 | `docker compose stop` | Stops every service; the containers stay | Kept |
-| `docker compose stop ngrok` | Stops only the public address; the site keeps running locally | Kept |
+| `docker compose stop ngrok` | Closes the public address: nobody can reach the site, the services keep running | Kept |
 | `docker compose down` | Stops and removes the containers | Kept (database and keys are in volumes) |
 | `docker compose down -v` | ⚠️ Stops, removes and **deletes the database and the Passport keys** | Lost |
 

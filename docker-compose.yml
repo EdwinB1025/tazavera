@@ -68,9 +68,7 @@ services:
       API_INTERNAL_URL: http://api:80
     depends_on:
       - api
-    # Local checks only; the tunnel uses front:3000 inside the network
-    ports:
-      - "3000:3000"
+    # No ports: only the tunnel (ngrok) reaches it, at front:3000 inside the network
     networks: [tazavera]
 
   ngrok:
