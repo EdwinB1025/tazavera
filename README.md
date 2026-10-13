@@ -7,6 +7,14 @@ Deployment repository for **Tazavera**, the specialty coffee verification platfo
 
 > This repository has **no application code**. The code lives in `tazzavera-api` (Laravel) and `tazavera-front` (Next.js); `install.sh` downloads them from GitHub and builds them here.
 
+## 📦 Repositories
+
+| Repository | What it is | Branch deployed |
+|---|---|---|
+| 🐘 [EdwinB1025/tazzavera-api](https://github.com/EdwinB1025/tazzavera-api) | REST API (Laravel 13, PHP 8.5, Passport) | `deploy` |
+| 🖥️ [EdwinB1025/tazavera-front](https://github.com/EdwinB1025/tazavera-front) | Web front (Next.js 16, React 19) | `develop` |
+| 🚀 [EdwinB1025/tazavera](https://github.com/EdwinB1025/tazavera) | This repository: compose and installation script | `master` |
+
 ## 🧩 What it runs
 
 | Service | What it is | Reachable from |
