@@ -90,15 +90,14 @@ docker compose up -d --wait db api scheduler
 docker compose exec -T api chown -R www-data:www-data storage bootstrap/cache
 artisan config:clear
 
-# 7. Migrations, every run
-artisan migrate --force
+# 7. Database rebuilt from scratch, every run: every table is dropped, migrated and seeded again,
+#    so the demo always starts from the seed data (accounts and data created on the site are lost)
+artisan migrate:fresh --seed --force
 
-# 8. Seed and Passport keys, only on an empty install
-has_client=$(artisan tinker --execute='echo App\Models\Passport\Client::front()->exists() ? 1 : 0;' | tr -d '\r')
-[ "$has_client" = 1 ] || artisan db:seed --force
+# 8. Passport keys, only when missing (the files survive the rebuilt database)
 docker compose exec -T api test -f storage/oauth-private.key || artisan passport:keys
 
-# 9. Front client ID: the seeder reuses the existing client and prints its ID
+# 9. Front client ID: the seed created a new client; the seeder reuses it and prints its ID
 FRONT_CLIENT_ID=$(artisan db:seed --class=FrontClientSeeder --force | sed -n 's/.*Front client ID: //p' | tr -d '\r')
 [ -n "$FRONT_CLIENT_ID" ] || fail "The API did not print the front client ID"
 export FRONT_CLIENT_ID

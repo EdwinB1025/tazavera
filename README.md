@@ -78,7 +78,9 @@ cd ~/tazavera
 ./install.sh
 ```
 
-The same script updates: it downloads the new commits, rebuilds only what changed, applies the new migrations and restarts what is needed. The database, the API key and the Passport keys are kept.
+The same script updates: it downloads the new commits, rebuilds only what changed, rebuilds the database from the seed data and restarts what is needed. The API key and the Passport keys are kept.
+
+> ⚠️ Every run **empties the database** and seeds it again: accounts and data created on the site are lost. The front is rebuilt with the new client ID.
 
 ## 🚦 Servers: state, stop and start
 
@@ -128,8 +130,8 @@ The site is offline while the laptop is off or asleep, or Docker Desktop is clos
 4. 🏗️ Builds the API image and checks its PHP requirements.
 5. 🔑 Generates `APP_KEY` the first time.
 6. ▶️ Starts the database, the API and the scheduler.
-7. 🗃️ Applies the migrations.
-8. 🌱 Seeds the database and creates the Passport keys, only on an empty install.
+7. 🗃️ Empties the database, applies every migration and seeds it, on every run.
+8. 🔐 Creates the Passport keys, only when they are missing.
 9. 🪪 Reads the front client ID from the API.
 10. ⚡ Rebuilds the API caches.
 11. 🖥️ Builds the front with the public address and the client ID, starts it with the tunnel, and waits until it answers.
@@ -163,7 +165,7 @@ Run them from `~/tazavera`.
 | `$'\r': command not found` | `install.sh` was saved with Windows line endings: save it with LF |
 | `The API image lacks PHP requirements` | A PHP extension is missing in the API's Dockerfile |
 | `The front does not answer on /es` | See the front's log printed above the message |
-| The first install failed during the seed | Start clean: `docker compose down -v`, then `./install.sh` |
+| The install failed during the seed | Run `./install.sh` again: it rebuilds the database from scratch |
 
 ## 📝 Notes
 
